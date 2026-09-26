@@ -1,5 +1,9 @@
 import cv2
 from typing import NamedTuple
+from enum import IntEnum
+
+class KeyboardKeys(IntEnum):
+    ESCAPE = 27
 
 
 class _image_Point(NamedTuple):
@@ -30,23 +34,30 @@ def _add_point(point: _image_Point, polygons: list[_polygon]) -> None:
     polygons[-1].add(point)
 
 def _click_event(event, x, y, flags, polygons: list[_polygon] | None):
-    if event == cv2.EVENT_LBUTTONDOWN:
-        if polygons is not None:
-            _add_point(_image_Point(x,y),polygons)
-            print(polygons)
+    match event:
+        case cv2.EVENT_LBUTTONDOWN:
+            if polygons is not None:
+                _add_point(_image_Point(x,y),polygons)
+                print(polygons)
+        
+            
         
 
 def Callibrate(image):
 
     polygons: list[_polygon] = []
     
-
     img = cv2.imread(image, cv2.IMREAD_COLOR)
     if img is None:
         raise FileNotFoundError(f"Could not read image: {image}")
     cv2.imshow("image", img)
     cv2.setMouseCallback('image', _click_event, polygons)
-    cv2.waitKey(0)
+    while True:
+        k = cv2.waitKey(20)
+        match k:
+            case KeyboardKeys.ESCAPE:
+                break
+
     cv2.destroyAllWindows()
 
 
