@@ -4,57 +4,56 @@ from enum import IntEnum
 import math
 import numpy as np
 
-class KeyboardKeys(IntEnum):
+class _KeyboardKeys(IntEnum):
     ESCAPE = 27
 
 
-class _image_Point(NamedTuple):
+class _ImagePoint(NamedTuple):
     x: int
     y: int
 
-class _polygon():
+class _Polygon():
     MAXSIZE = 4
 
     def __init__(self) -> None:
-        self.points: list[_image_Point] = []
+        self.points: list[_ImagePoint] = []
 
     def __repr__(self) -> str:
-        return f"_polygon({self.points})"
+        return f"_Polygon({self.points})"
 
-    def add(self, point: _image_Point) -> None:
+    def add(self, point: _ImagePoint) -> None:
         self.points.append(point)
 
     def isFull(self) -> bool:
-        if len(self.points) >= self.MAXSIZE:
-            return True
-        else: return False
+        return len(self.points) >= self.MAXSIZE
 
 
-def _order_points(points: list[_image_Point]) -> list[_image_Point]:
+
+def _order_points(points: list[_ImagePoint]) -> list[_ImagePoint]:
     cx = sum(p.x for p in points) / len(points)
     cy = sum(p.y for p in points) / len(points)
     return sorted(points, key=lambda p: math.atan2(p.y - cy, p.x - cx))
 
-def _add_point(point: _image_Point, polygons: list[_polygon]) -> None:
+def _add_point(point: _ImagePoint, polygons: list[_Polygon]) -> None:
     if len(polygons) == 0 or polygons[-1].isFull():
-        polygons.append(_polygon())
+        polygons.append(_Polygon())
     polygons[-1].add(point)
     if polygons[-1].isFull():# just completed?
         polygons[-1].points = _order_points(polygons[-1].points)
 
-def _click_event(event, x, y, flags, polygons: list[_polygon] | None):
+def _click_event(event, x, y, _flags, polygons: list[_Polygon] | None):
     match event:
         case cv2.EVENT_LBUTTONDOWN:
             if polygons is not None:
-                _add_point(_image_Point(x,y),polygons)
+                _add_point(_ImagePoint(x,y),polygons)
                 print(polygons)
         
             
         
 
-def Callibrate(image):
+def calibrate(image):
 
-    polygons: list[_polygon] = []
+    polygons: list[_Polygon] = []
     
     img = cv2.imread(image, cv2.IMREAD_COLOR)
     if img is None:
@@ -78,7 +77,7 @@ def Callibrate(image):
             break
 
         match k:
-            case KeyboardKeys.ESCAPE:
+            case _KeyboardKeys.ESCAPE:
                 break
 
     cv2.destroyAllWindows()
@@ -86,4 +85,4 @@ def Callibrate(image):
 
 
 if __name__ == '__main__':
-    print(Callibrate(image="data/test/2012-09-11_16_48_36_jpg.rf.4ecc8c87c61680ccc73edc218a2c8d7d (2).jpg"))
+    print(calibrate(image="data/test/2012-09-11_16_48_36_jpg.rf.4ecc8c87c61680ccc73edc218a2c8d7d (2).jpg"))
