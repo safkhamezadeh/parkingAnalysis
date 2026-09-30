@@ -41,14 +41,14 @@ def _orderPoints(points: list[_ImagePoint]) -> list[_ImagePoint]:
 
 def _addPoint(point: _ImagePoint, polygons: list[Polygon]) -> None:
     if len(polygons) == 0 or polygons[-1].isFull(): #is empty or current polygon is full
-        new_id = len(polygons) + 1"
+        new_id = len(polygons) + 1
         polygons.append(Polygon(id=new_id))
     polygons[-1].add(point)
 
 def _drawPolygons(img, polygons: list[Polygon]) -> np.ndarray:
     frame = img.copy()
     for polygon in polygons:
-        pts = polygon.points
+        pts: list[_ImagePoint] = polygon.points
         if len(pts) >= 2:
             np_pts = np.array([(p.x, p.y) for p in pts], dtype=np.int32)
             cv2.polylines(frame, [np_pts], isClosed=polygon.isFull(),
@@ -65,22 +65,29 @@ def _click_event(event, x, y, _flags, polygons: list[Polygon] | None):
                 print(polygons)
         
             
-        
 
-def calibrate(image):
+
+
+        
+def Calibrate(image: np.ndarray) -> list[Polygon]:
 
     polygons: list[Polygon] = []
-    
-    img = cv2.imread(image, cv2.IMREAD_COLOR)
-    if img is None:
-        raise FileNotFoundError(f"Could not read image: {image}")
-    cv2.namedWindow("image")
-    cv2.setMouseCallback('image', _click_event, polygons)
+
+
+    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+
+    cv2.setMouseCallback(
+        "image",
+        _click_event,
+        polygons
+    )
+
     while True:
-        frame = _drawPolygons(img, polygons)
+        frame = _drawPolygons(image, polygons)
         cv2.imshow("image", frame)
-                
+
         k = cv2.waitKey(20)
+
         if cv2.getWindowProperty("image", cv2.WND_PROP_VISIBLE) < 1:
             break
 
@@ -89,8 +96,4 @@ def calibrate(image):
                 break
 
     cv2.destroyAllWindows()
-
-
-
-if __name__ == '__main__':
-    print(calibrate(image="data/test/2012-09-11_16_48_36_jpg.rf.4ecc8c87c61680ccc73edc218a2c8d7d (2).jpg"))
+    return polygons
