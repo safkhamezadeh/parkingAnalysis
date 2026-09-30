@@ -12,14 +12,17 @@ class _ImagePoint(NamedTuple):
     x: int
     y: int
 
-class _Polygon():
+class Polygon():
     MAXSIZE = 4
 
-    def __init__(self) -> None:
+    def __init__(self, id: int, zone: str = "unassigned", type: str = "unassigned") -> None:
         self.points: list[_ImagePoint] = []
+        self.id = id
+        self.zone = zone
+        self.type = type
 
     def __repr__(self) -> str:
-        return f"_Polygon({self.points})"
+        return f"Polygon({self.points})"
 
     def add(self, point: _ImagePoint) -> None:
         self.points.append(point)
@@ -36,12 +39,13 @@ def _orderPoints(points: list[_ImagePoint]) -> list[_ImagePoint]:
     cy = sum(p.y for p in points) / len(points)
     return sorted(points, key=lambda p: math.atan2(p.y - cy, p.x - cx))
 
-def _addPoint(point: _ImagePoint, polygons: list[_Polygon]) -> None:
+def _addPoint(point: _ImagePoint, polygons: list[Polygon]) -> None:
     if len(polygons) == 0 or polygons[-1].isFull(): #is empty or current polygon is full
-        polygons.append(_Polygon())
+        new_id = len(polygons) + 1"
+        polygons.append(Polygon(id=new_id))
     polygons[-1].add(point)
 
-def _drawPolygons(img, polygons: list[_Polygon]) -> np.ndarray:
+def _drawPolygons(img, polygons: list[Polygon]) -> np.ndarray:
     frame = img.copy()
     for polygon in polygons:
         pts = polygon.points
@@ -53,7 +57,7 @@ def _drawPolygons(img, polygons: list[_Polygon]) -> np.ndarray:
             cv2.circle(frame, (point.x, point.y), 3, (0, 0, 255), -1)
     return frame
 
-def _click_event(event, x, y, _flags, polygons: list[_Polygon] | None):
+def _click_event(event, x, y, _flags, polygons: list[Polygon] | None):
     match event:
         case cv2.EVENT_LBUTTONDOWN:
             if polygons is not None:
@@ -65,7 +69,7 @@ def _click_event(event, x, y, _flags, polygons: list[_Polygon] | None):
 
 def calibrate(image):
 
-    polygons: list[_Polygon] = []
+    polygons: list[Polygon] = []
     
     img = cv2.imread(image, cv2.IMREAD_COLOR)
     if img is None:
