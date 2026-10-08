@@ -7,6 +7,7 @@ def test_calibration_integration():
 
     path: Path = Path("data/testlot_1/2012-09-11_16_48_36_jpg.rf.4ecc8c87c61680ccc73edc218a2c8d7d (2).jpg")
 
+    #just make sure the file is in the correct folder
     image = Load_image(path=path)
 
     calibrated = Calibrate(image)
