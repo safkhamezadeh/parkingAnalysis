@@ -63,10 +63,6 @@ def _click_event(event, x, y, _flags, polygons: list[Polygon] | None):
             if polygons is not None:
                 _addPoint(_ImagePoint(x,y),polygons)
                 print(polygons)
-        
-            
-
-
 
         
 def Calibrate(image: np.ndarray) -> list[Polygon]:
